@@ -1,12 +1,12 @@
 """
 ==========================================================================
-GynSurg Wound Complication Risk Calculator
+GynSurg Wound Complication Risk Calculator — v2.0 (SC fat removed)
 Proof-of-Concept Web Application — For Research Purposes Only
 
 Paper: "Exploratory machine learning analysis for identification of risk
         factors for wound complications after abdominal gynecologic surgery:
         a pilot study with proof-of-concept web application"
-Authors: Song YJ, Kim SK*, Yoon HS*
+Authors: Song YJ, Yoon HS*, Kim SK*
 Journal: EJOGRB 2026
 
 IMPORTANT: NOT validated for clinical decision-making.
@@ -115,7 +115,7 @@ TEXT = {
         "disclaimer": (
             "이 도구는 파일럿 연구(n=231, 8건 이벤트)의 탐색적 도구입니다. "
             "임상 사용을 위해 <strong>검증되지 않았습니다</strong>. "
-            "AUROC &lt; 0.5, EPV = 0.5. 자세한 제한 사항은 논문을 참조하세요."
+            "AUROC 0.581, EPV = 0.57. 자세한 제한 사항은 논문을 참조하세요."
         ),
         # Sidebar
         "patient_info": "환자 정보",
@@ -135,10 +135,6 @@ TEXT = {
         "incision_section": "절개 유형",
         "wound_type": "절개 방법",
         "wt_options": ["하복부 정중절개", "정중절개", "Pfannenstiel"],
-        "sc_fat_section": "피하지방 두께 (초음파)",
-        "sc_sp": "치골결합 상연",
-        "sc_below": "배꼽 2cm 하방",
-        "sc_above": "배꼽 2cm 상방",
         "lab_section": "수술 전 검사 수치",
         "albumin": "알부민",
         "hemoglobin": "헤모글로빈",
@@ -166,9 +162,6 @@ TEXT = {
             'Smoking': '현재/최근 흡연',
             'Prior_abd_surgery': '복부 수술 기왕력',
             'Pulmonary_disease': '폐질환',
-            'SC_fat_SP': '피하지방 — 치골결합 상연',
-            'SC_fat_below_umbilicus': '피하지방 — 배꼽 하방',
-            'SC_fat_above_umbilicus': '피하지방 — 배꼽 상방',
             'Preop_albumin': '수술 전 알부민',
             'Preop_hemoglobin': '수술 전 헤모글로빈',
             'Preop_glucose': '수술 전 혈당',
@@ -185,15 +178,13 @@ TEXT = {
         "var_names": [
             '연령', 'BMI', '고혈압', '당뇨병', '흡연',
             '복부 수술력', '폐질환', '진단',
-            '절개 유형', '피하지방 (SP)', '피하지방 (배꼽 하방)',
-            '피하지방 (배꼽 상방)', '알부민', '헤모글로빈', '혈당',
+            '절개 유형', '알부민', '헤모글로빈', '혈당',
         ],
         "yes": "예", "no": "아니오",
         "study_stats": [
             "49.0 ± 12.8", "24.0 ± 3.6",
             "17.7%", "6.1%", "3.9%", "44.2%", "0.9%",
             "38.5% 악성", "47.6% 하복부 정중",
-            "2.4 ± 0.8", "2.4 ± 0.8", "2.6 ± 1.7",
             "4.1 ± 0.5", "11.7 ± 1.7", "106.4 ± 36.1",
         ],
         # Clinical notes
@@ -204,13 +195,13 @@ TEXT = {
 2. **수술 전 헤모글로빈** — 높은 Hb가 합병증과 역설적 연관 (교란 가능성)
 3. **복부 수술 기왕력** — 50% vs 43.9%
 4. **수술 전 알부민** — 낮은 알부민 → 높은 위험 (영양 상태 지표)
-5. **수술 복잡도** — 수술 시간, 출혈량
+5. **절개 유형** — 하복부 정중절개에서 위험도 증가 경향
 """,
         "limitations_title": "**주요 제한사항**",
         "limitations": """
 1. 파일럿 연구: 231명 중 **8건** 창상 합병증
-2. EPV(Events-per-variable) = **0.5**, 권장 최소값 ≥ 10 미달
-3. 모델 **AUROC < 0.5** — 개인 수준 예측 신뢰도 부족
+2. EPV(Events-per-variable) = **0.57**, 권장 최소값 ≥ 10 미달
+3. 모델 **AUROC = 0.581** — 파일럿 수준, 임상 적용 불가
 4. 이 도구는 **연구 시연 목적 전용**
 5. 임상 검증을 위해 **다기관 연구(≥ 500명)** 필요
 """,
@@ -218,7 +209,7 @@ TEXT = {
         "model_details": "모델 상세 정보 및 계수",
         "model_desc": (
             "**모델**: L1-정규화 로지스틱 회귀 (Lasso)\n"
-            "— **17개 수술 전 변수**, z-score 표준화 후 학습\n\n"
+            "— **14개 수술 전 변수**, z-score 표준화 후 학습\n\n"
             "**기저 절편**: `log(8 / 223) = {:.4f}` (연구 유병률 3.5%)\n\n"
             "**파이프라인**: `원시값 → z-score → × 계수 → Σ log-odds → + 기저 절편 → 시그모이드 → 확률`"
         ),
@@ -230,9 +221,9 @@ TEXT = {
         "coef_caption": "계수는 z-score 표준화된 입력값에 적용됩니다. 계수 0.0은 L1 정규화에 의해 제거된 변수입니다.",
         # Footer
         "footer": (
-            "<strong>GynSurg Wound Risk Calculator v1.0</strong> &nbsp;|&nbsp; "
+            "<strong>GynSurg Wound Risk Calculator v2.0</strong> &nbsp;|&nbsp; "
             "개념 증명 애플리케이션<br>"
-            "Song YJ, Kim SK, Yoon HS &nbsp;|&nbsp; EJOGRB 2026<br>"
+            "Song YJ, Yoon HS, Kim SK &nbsp;|&nbsp; EJOGRB 2026<br>"
             "Built with Streamlit &nbsp;|&nbsp; "
             "모델: L1-정규화 로지스틱 회귀<br>"
             "⚠️ <strong>임상 사용 불가</strong> — 연구 시연 목적 전용"
@@ -246,7 +237,7 @@ TEXT = {
         "disclaimer": (
             "This is an exploratory tool from a pilot study "
             "(n=231, 8 events). It is <strong>NOT</strong> validated for clinical use. "
-            "AUROC &lt; 0.5 and EPV = 0.5. See the paper for full details on limitations."
+            "AUROC 0.581 and EPV = 0.57. See the paper for full details on limitations."
         ),
         # Sidebar
         "patient_info": "Patient Information",
@@ -266,10 +257,6 @@ TEXT = {
         "incision_section": "Planned Incision",
         "wound_type": "Wound Type",
         "wt_options": ["Low midline", "Midline", "Pfannenstiel"],
-        "sc_fat_section": "Subcutaneous Fat (US)",
-        "sc_sp": "Upper margin of SP",
-        "sc_below": "2 cm below umbilicus",
-        "sc_above": "2 cm above umbilicus",
         "lab_section": "Preoperative Labs",
         "albumin": "Albumin",
         "hemoglobin": "Hemoglobin",
@@ -297,9 +284,6 @@ TEXT = {
             'Smoking': 'Current/Recent Smoking',
             'Prior_abd_surgery': 'Prior Abdominal Surgery',
             'Pulmonary_disease': 'Pulmonary Disease',
-            'SC_fat_SP': 'SC Fat — Upper SP',
-            'SC_fat_below_umbilicus': 'SC Fat — Below Umbilicus',
-            'SC_fat_above_umbilicus': 'SC Fat — Above Umbilicus',
             'Preop_albumin': 'Preop Albumin',
             'Preop_hemoglobin': 'Preop Hemoglobin',
             'Preop_glucose': 'Preop Glucose',
@@ -316,15 +300,13 @@ TEXT = {
         "var_names": [
             'Age', 'BMI', 'Hypertension', 'Diabetes', 'Smoking',
             'Prior Surgery', 'Pulmonary Disease', 'Diagnosis',
-            'Wound Type', 'SC Fat (SP)', 'SC Fat (below umb.)',
-            'SC Fat (above umb.)', 'Albumin', 'Hemoglobin', 'Glucose',
+            'Wound Type', 'Albumin', 'Hemoglobin', 'Glucose',
         ],
         "yes": "Yes", "no": "No",
         "study_stats": [
             "49.0 ± 12.8", "24.0 ± 3.6",
             "17.7%", "6.1%", "3.9%", "44.2%", "0.9%",
             "38.5% malignant", "47.6% low midline",
-            "2.4 ± 0.8", "2.4 ± 0.8", "2.6 ± 1.7",
             "4.1 ± 0.5", "11.7 ± 1.7", "106.4 ± 36.1",
         ],
         # Clinical notes
@@ -335,13 +317,13 @@ TEXT = {
 2. **Preoperative hemoglobin** — higher Hb paradoxically associated with complications (possible confounding)
 3. **Prior abdominal surgery** — 50% vs 43.9%
 4. **Preoperative albumin** — lower albumin → higher risk (nutritional marker)
-5. **Operative complexity** — longer surgery time, greater blood loss
+5. **Incision type** — low midline incision associated with increased risk
 """,
         "limitations_title": "**Important Limitations**",
         "limitations": """
 1. Pilot study: only **8 wound complication events** in 231 patients
-2. Events-per-variable (EPV) = **0.5**, far below the recommended ≥ 10
-3. Model **AUROC < 0.5** — cannot reliably discriminate individual outcomes
+2. Events-per-variable (EPV) = **0.57**, far below the recommended ≥ 10
+3. Model **AUROC = 0.581** — pilot-level, not for clinical application
 4. This tool is for **research demonstration purposes only**
 5. A multicenter study with **≥ 500 patients** is required for clinical validation
 """,
@@ -349,7 +331,7 @@ TEXT = {
         "model_details": "Model Details & Coefficients",
         "model_desc": (
             "**Model**: L1-Regularized Logistic Regression (Lasso)\n"
-            "— trained on **17 preoperative variables**, standardized via z-score.\n\n"
+            "— trained on **14 preoperative variables**, standardized via z-score.\n\n"
             "**Baseline intercept**: `log(8 / 223) = {:.4f}` (study prevalence 3.5%)\n\n"
             "**Pipeline**: `raw value → z-score → × coefficient → Σ log-odds → + baseline → sigmoid → probability`"
         ),
@@ -361,9 +343,9 @@ TEXT = {
         "coef_caption": "Coefficients operate on z-score–standardized inputs. A coefficient of 0.0 means the feature was eliminated by L1 regularization.",
         # Footer
         "footer": (
-            "<strong>GynSurg Wound Risk Calculator v1.0</strong> &nbsp;|&nbsp; "
+            "<strong>GynSurg Wound Risk Calculator v2.0</strong> &nbsp;|&nbsp; "
             "Proof-of-Concept Application<br>"
-            "Song YJ, Kim SK, Yoon HS &nbsp;|&nbsp; EJOGRB 2026<br>"
+            "Song YJ, Yoon HS, Kim SK &nbsp;|&nbsp; EJOGRB 2026<br>"
             "Built with Streamlit &nbsp;|&nbsp; "
             "Model: L1-Regularized Logistic Regression<br>"
             "⚠️ <strong>NOT for clinical use</strong> — research demonstration only"
@@ -372,27 +354,34 @@ TEXT = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════
-# MODEL DATA — DO NOT MODIFY
+# MODEL DATA — v3 analysis (SC fat variables removed)
 # ══════════════════════════════════════════════════════════════════════════
 
+# ── L1-LR coefficients from v3 analysis (14 preoperative features) ──
+# NOTE: Diabetes (β = −0.1607) and Smoking (β = −0.1658) showed paradoxical
+# negative associations. With only 8 events and EPV = 0.57, this is a
+# spurious finding (0/8 complication patients had diabetes or smoked).
+#
+# CLINICAL OVERRIDE: These two coefficients are set to 0.0 (equivalent to
+# L1 elimination) because it is clinically implausible that diabetes and
+# smoking are protective against wound complications. This decision is
+# documented in the manuscript (Section 2.10 and Table 3).
+# Original values preserved in comments for transparency.
 LR_COEFFICIENTS = {
-    'Age': -0.2955,
-    'BMI': 0.0,
-    'Hypertension': 0.0,
-    'Diabetes': 0.1441,
-    'Smoking': 0.2698,
-    'Prior_abd_surgery': 0.5169,
-    'Pulmonary_disease': 0.0,
-    'SC_fat_SP': 0.0142,
-    'SC_fat_below_umbilicus': -0.1912,
-    'SC_fat_above_umbilicus': 0.0,
-    'Preop_albumin': -0.4419,
-    'Preop_hemoglobin': 0.8478,
-    'Preop_glucose': -0.9009,
-    'Dx_malignant': 0.7129,
-    'Dx_benign_myoma': 0.0,
-    'WT_low_midline': 0.3559,
-    'WT_midline': 0.0,
+    'Age': -0.0924,
+    'BMI': 0.0,                         # L1-eliminated
+    'Hypertension': 0.0,                # L1-eliminated
+    'Diabetes': 0.0,                    # Clinical override (original: −0.1607)
+    'Smoking': 0.0,                     # Clinical override (original: −0.1658)
+    'Prior_abd_surgery': 0.4463,
+    'Pulmonary_disease': 0.0,           # L1-eliminated
+    'Preop_albumin': -0.5346,
+    'Preop_hemoglobin': 0.5578,
+    'Preop_glucose': -1.3178,
+    'Dx_malignant': 1.0194,
+    'Dx_benign_myoma': 0.0,             # L1-eliminated
+    'WT_low_midline': 0.4612,
+    'WT_midline': 0.0,                  # L1-eliminated
 }
 
 POPULATION_STATS = {
@@ -403,9 +392,6 @@ POPULATION_STATS = {
     'Smoking':                {'mean': 0.039,  'std': 0.194},
     'Prior_abd_surgery':      {'mean': 0.442,  'std': 0.498},
     'Pulmonary_disease':      {'mean': 0.009,  'std': 0.093},
-    'SC_fat_SP':              {'mean': 2.4,    'std': 0.8},
-    'SC_fat_below_umbilicus': {'mean': 2.4,    'std': 0.8},
-    'SC_fat_above_umbilicus': {'mean': 2.6,    'std': 1.7},
     'Preop_albumin':          {'mean': 4.1,    'std': 0.5},
     'Preop_hemoglobin':       {'mean': 11.7,   'std': 1.7},
     'Preop_glucose':          {'mean': 106.4,  'std': 36.1},
@@ -500,11 +486,6 @@ with st.sidebar:
     st.markdown(f"### {t['incision_section']}")
     wound_type = st.selectbox(t["wound_type"], t["wt_options"])
 
-    st.markdown(f"### {t['sc_fat_section']}")
-    sc_sp = st.slider(t["sc_sp"], 0.5, 5.5, 2.4, 0.1, format="%.1f cm")
-    sc_below = st.slider(t["sc_below"], 0.2, 6.0, 2.4, 0.1, format="%.1f cm")
-    sc_above = st.slider(t["sc_above"], 0.2, 6.0, 2.6, 0.1, format="%.1f cm")
-
     st.markdown(f"### {t['lab_section']}")
     albumin = st.slider(t["albumin"], 1.0, 5.5, 4.1, 0.1, format="%.1f g/dL")
     hemoglobin = st.slider(t["hemoglobin"], 5.0, 18.0, 11.7, 0.1, format="%.1f g/dL")
@@ -535,9 +516,6 @@ patient_values = {
     'Smoking': int(smoking),
     'Prior_abd_surgery': int(prior_surg),
     'Pulmonary_disease': int(pul_disease),
-    'SC_fat_SP': sc_sp,
-    'SC_fat_below_umbilicus': sc_below,
-    'SC_fat_above_umbilicus': sc_above,
     'Preop_albumin': albumin,
     'Preop_hemoglobin': hemoglobin,
     'Preop_glucose': glucose,
@@ -678,7 +656,6 @@ summary_data = {
         yes if smoking else no, yes if prior_surg else no,
         yes if pul_disease else no,
         diagnosis, wound_type,
-        f"{sc_sp:.1f} cm", f"{sc_below:.1f} cm", f"{sc_above:.1f} cm",
         f"{albumin:.1f} g/dL", f"{hemoglobin:.1f} g/dL", f"{glucose} mg/dL",
     ],
     t["col_study"]: t["study_stats"],
@@ -688,7 +665,7 @@ st.dataframe(
     pd.DataFrame(summary_data),
     width="stretch",
     hide_index=True,
-    height=560,
+    height=460,
 )
 
 
